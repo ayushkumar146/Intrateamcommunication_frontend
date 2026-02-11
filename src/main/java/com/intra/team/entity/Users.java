@@ -15,7 +15,7 @@ public class Users {
     private String phone_number;
     private String email;
     private String password;
-
+    private String role;
 //    public String getId() {
 //        return id;
 //    }

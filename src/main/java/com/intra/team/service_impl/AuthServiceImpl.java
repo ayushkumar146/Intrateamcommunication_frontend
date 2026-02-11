@@ -30,6 +30,7 @@ public class AuthServiceImpl implements AuthService {
         user.setUsername(req.getName());
         user.setEmail(req.getEmail());
         user.setPhone_number(req.getPhoneNumber());
+        user.setRole("ROLE_USER");   // default
         user.setPassword(passwordEncoder.encode(req.getPassword()));
 
         userRepository.save(user);
@@ -46,6 +47,6 @@ public class AuthServiceImpl implements AuthService {
             throw new RuntimeException("Invalid credentials");
         }
 
-        return jwtUtil.generateToken(user.getEmail());
+        return jwtUtil.generateToken(user.getEmail(),user.getRole());
     }
 }
