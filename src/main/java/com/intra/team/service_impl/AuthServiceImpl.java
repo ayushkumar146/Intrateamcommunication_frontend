@@ -5,6 +5,7 @@ import com.intra.team.dtos.RegisterDTO;
 import com.intra.team.entity.Users;
 import com.intra.team.repository.UserRepository;
 import com.intra.team.services.AuthService;
+import com.intra.team.services.EmailOtpService;
 import com.intra.team.utils.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -17,6 +18,7 @@ public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final EmailOtpService emailOtpService;
 
     // ✅ REGISTER
     @Override
@@ -24,6 +26,9 @@ public class AuthServiceImpl implements AuthService {
 
         if (userRepository.findByEmail(req.getEmail()).isPresent()) {
             throw new RuntimeException("Email already registered");
+        }
+        if (!emailOtpService.isVerified(req.getEmail())) {
+            throw new RuntimeException("Email not verified");
         }
 
         Users user = new Users();
