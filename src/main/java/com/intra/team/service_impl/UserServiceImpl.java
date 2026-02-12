@@ -1,4 +1,5 @@
 package com.intra.team.service_impl;
+import com.intra.team.dtos.PasswordUpdateDTO;
 import com.intra.team.dtos.UserProfileDTO;
 import com.intra.team.entity.UserUpdateDTO;
 import com.intra.team.entity.Users;
@@ -7,11 +8,13 @@ import com.intra.team.repository.UserRepository;
 import com.intra.team.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
+    private final PasswordEncoder passwordEncoder;
 
     private final UserRepository userRepository;
 
@@ -58,6 +61,40 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found: " + email));
     }
+
+    @Override
+    public UserProfileDTO changePassword(Authentication auth,
+                                         PasswordUpdateDTO dto) {
+
+        String username = auth.getName();
+
+        Users user = userRepository.findByEmail(username)
+                .orElseThrow(() ->
+                        new RuntimeException("User not found"));
+
+        // ✅ new == confirm check
+        if (!dto.getNewPassword()
+                .equals(dto.getConfirmPassword())) {
+            throw new RuntimeException("New passwords do not match");
+        }
+
+        // ✅ verify old password
+        if (!passwordEncoder.matches(
+                dto.getOldPassword(),
+                user.getPassword())) {
+            throw new RuntimeException("Old password incorrect");
+        }
+
+        // ✅ encode new password
+        user.setPassword(
+                passwordEncoder.encode(dto.getNewPassword())
+        );
+
+        userRepository.save(user);
+
+        return UserMapper.toDTO(user);
+    }
+
 }
 
 

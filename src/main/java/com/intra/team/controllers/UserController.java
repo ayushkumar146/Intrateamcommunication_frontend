@@ -1,5 +1,6 @@
 package com.intra.team.controllers;
 
+import com.intra.team.dtos.PasswordUpdateDTO;
 import com.intra.team.dtos.UserProfileDTO;
 import com.intra.team.entity.UserUpdateDTO;
 import com.intra.team.services.UserService;
@@ -36,6 +37,15 @@ public class UserController {
 
         userService.deleteMyAccount(authentication);
         return "Account deleted successfully";
+    }
+
+    @PutMapping("/password")
+    @PreAuthorize("hasRole('USER')")
+    public UserProfileDTO changePassword(
+            Authentication auth,
+            @RequestBody PasswordUpdateDTO dto) {
+
+        return userService.changePassword(auth, dto);
     }
 }
 
