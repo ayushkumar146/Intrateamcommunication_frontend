@@ -4,6 +4,7 @@ package com.intra.team.controllers;
 import com.intra.team.dtos.LoginDTO;
 import com.intra.team.dtos.RegisterDTO;
 import com.intra.team.services.AuthService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +20,7 @@ public class AuthController {
 
     // ✅ REGISTER
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody RegisterDTO dto) {
+    public ResponseEntity<String> register(@Valid @RequestBody RegisterDTO dto) {
 
         authService.register(dto);
         return ResponseEntity.ok("User registered successfully");
@@ -27,7 +28,7 @@ public class AuthController {
 
     // ✅ LOGIN
     @PostMapping("/login")
-    public ResponseEntity<Map<String, String>> login(@RequestBody LoginDTO dto) {
+    public ResponseEntity<Map<String, String>> login(@Valid @RequestBody LoginDTO dto) {
 
         String token = authService.login(dto);
 

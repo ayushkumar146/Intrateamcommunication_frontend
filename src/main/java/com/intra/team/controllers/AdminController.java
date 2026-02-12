@@ -5,6 +5,7 @@ import com.intra.team.dtos.PasswordUpdateDTO;
 import com.intra.team.dtos.UserProfileDTO;
 import com.intra.team.entity.UserUpdateDTO;
 import com.intra.team.services.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -28,7 +29,7 @@ public class AdminController {
     @PreAuthorize("hasRole('ADMIN')")
     public UserProfileDTO updateProfile(
             Authentication authentication,
-            @RequestBody UserUpdateDTO dto) {
+            @Valid @RequestBody UserUpdateDTO dto) {
 
         return userService.updateMyProfile(authentication, dto);
     }
@@ -45,7 +46,7 @@ public class AdminController {
     @PreAuthorize("hasRole('ADMIN')")
     public UserProfileDTO changePassword(
             Authentication auth,
-            @RequestBody PasswordUpdateDTO dto) {
+            @Valid @RequestBody PasswordUpdateDTO dto) {
 
         return userService.changePassword(auth, dto);
     }

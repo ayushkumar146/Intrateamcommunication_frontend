@@ -2,6 +2,7 @@ package com.intra.team.configs;
 
 
 
+import com.intra.team.security.CustomAuthEntryPoint;
 import com.intra.team.security.JwtAuthFilter;
 import org.springframework.context.annotation.*;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -18,12 +19,15 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http,
-                                           JwtAuthFilter jwtFilter) throws Exception {
+                                           JwtAuthFilter jwtFilter, CustomAuthEntryPoint authEntryPoint) throws Exception {
 
         return http
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(sess ->
                         sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(authEntryPoint)
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**").permitAll()
