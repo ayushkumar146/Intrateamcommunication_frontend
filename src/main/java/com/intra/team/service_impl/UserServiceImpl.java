@@ -3,6 +3,7 @@ import com.intra.team.dtos.PasswordUpdateDTO;
 import com.intra.team.dtos.UserProfileDTO;
 import com.intra.team.entity.UserUpdateDTO;
 import com.intra.team.entity.Users;
+import com.intra.team.exceptions.ResourceNotFoundException;
 import com.intra.team.mappers.UserMapper;
 import com.intra.team.repository.UserRepository;
 import com.intra.team.services.UserService;
@@ -24,7 +25,7 @@ public class UserServiceImpl implements UserService {
         String username = auth.getName();   // 👈 from JWT filter
         System.out.println("username1"+username);
         Users user = userRepository.findByEmail(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         return UserMapper.toDTO(user);
     }
@@ -59,7 +60,7 @@ public class UserServiceImpl implements UserService {
         // Ensure auth.getName() is actually returning "ayush@test.com"
         String email = auth.getName();
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found: " + email));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + email));
     }
 
     @Override
@@ -70,19 +71,19 @@ public class UserServiceImpl implements UserService {
 
         Users user = userRepository.findByEmail(username)
                 .orElseThrow(() ->
-                        new RuntimeException("User not found"));
+                        new ResourceNotFoundException("User not found"));
 
         // ✅ new == confirm check
         if (!dto.getNewPassword()
                 .equals(dto.getConfirmPassword())) {
-            throw new RuntimeException("New passwords do not match");
+            throw new ResourceNotFoundException("New passwords do not match");
         }
 
         // ✅ verify old password
         if (!passwordEncoder.matches(
                 dto.getOldPassword(),
                 user.getPassword())) {
-            throw new RuntimeException("Old password incorrect");
+            throw new ResourceNotFoundException("Old password incorrect");
         }
 
         // ✅ encode new password

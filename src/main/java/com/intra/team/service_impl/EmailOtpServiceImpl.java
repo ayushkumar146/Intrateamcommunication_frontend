@@ -1,6 +1,8 @@
 package com.intra.team.service_impl;
 
 import com.intra.team.entity.EmailOtpRecord;
+import com.intra.team.exceptions.BadRequestException;
+import com.intra.team.exceptions.ResourceNotFoundException;
 import com.intra.team.repository.EmailOtpRepository;
 import com.intra.team.services.EmailOtpService;
 import com.intra.team.services.EmailService;
@@ -44,10 +46,10 @@ public class EmailOtpServiceImpl implements EmailOtpService {
 
         EmailOtpRecord record = repo
                 .findByEmailAndOtp(email, otp)
-                .orElseThrow(() -> new RuntimeException("Invalid OTP"));
+                .orElseThrow(() -> new ResourceNotFoundException("Invalid OTP"));
 
         if (record.getExpiryTime().isBefore(Instant.now())) {
-            throw new RuntimeException("OTP expired");
+            throw new BadRequestException("OTP expired");
         }
 
         if (record.isVerified()) {

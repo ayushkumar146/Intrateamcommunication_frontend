@@ -3,6 +3,9 @@ package com.intra.team.service_impl;
 import com.intra.team.dtos.LoginDTO;
 import com.intra.team.dtos.RegisterDTO;
 import com.intra.team.entity.Users;
+import com.intra.team.exceptions.BadRequestException;
+import com.intra.team.exceptions.ResourceNotFoundException;
+import com.intra.team.exceptions.UnauthorizedException;
 import com.intra.team.repository.UserRepository;
 import com.intra.team.services.AuthService;
 import com.intra.team.services.EmailOtpService;
@@ -25,10 +28,10 @@ public class AuthServiceImpl implements AuthService {
     public void register(RegisterDTO req) {
 
         if (userRepository.findByEmail(req.getEmail()).isPresent()) {
-            throw new RuntimeException("Email already registered");
+            throw new BadRequestException("Email already registered");
         }
         if (!emailOtpService.isVerified(req.getEmail())) {
-            throw new RuntimeException("Email not verified");
+            throw new UnauthorizedException("Email not verified");
         }
 
         Users user = new Users();
@@ -46,10 +49,10 @@ public class AuthServiceImpl implements AuthService {
     public String login(LoginDTO req) {
 
         Users user = userRepository.findByEmail(req.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         if (!passwordEncoder.matches(req.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Invalid credentials");
+            throw new UnauthorizedException("Invalid credentials");
         }
 
         return jwtUtil.generateToken(user.getEmail(),user.getRole());

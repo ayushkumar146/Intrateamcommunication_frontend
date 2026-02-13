@@ -770,5 +770,25 @@ Endpoints allow/block based on that
 ```
 
 ---
+========================================================================================================
+Error Handling:-
+
+---
+
+# ✅ Error Handling Flow — How It Works in This Project
+
+This application uses layered error handling across Spring Security, JWT filters, controller validation, and global exception handlers. Errors are intercepted at different levels depending on when they occur during the request lifecycle.
+
+When a request enters the system, it first passes through the Spring Security filter chain. The custom JWT filter runs before controller execution and checks the Authorization header. If the JWT token is missing, malformed, expired, or invalid, authentication is not established. Because the application is configured to require authentication for all protected endpoints and anonymous access is disabled, Spring Security immediately stops further processing and triggers the AuthenticationEntryPoint. The CustomAuthEntryPoint then returns a structured 401 Unauthorized JSON response indicating that the token is missing or invalid. This happens before any controller or service logic runs.
+
+If a JWT token is present and valid, the filter extracts the username and role and sets an Authentication object into the SecurityContext. The request is then allowed to proceed to the controller layer. At this stage, method-level authorization rules such as @PreAuthorize are evaluated. If the user is authenticated but does not have the required role (for example, a USER calling an ADMIN endpoint), Spring throws an AccessDeniedException. This results in a 403 Forbidden response, optionally handled by a custom AccessDeniedHandler if configured.
+
+Once the request reaches a controller method, request body validation occurs for any DTO annotated with @Valid. Bean Validation annotations like NotBlank, Email, Size, and Pattern are evaluated automatically. If validation fails, Spring throws MethodArgumentNotValidException. This exception is intercepted by the GlobalExceptionHandler (a @RestControllerAdvice class), which converts validation failures into structured field-level error responses instead of default error pages.
+
+Inside the service layer, business rule violations are handled using custom exceptions such as UserNotFoundException, InvalidPasswordException, or DuplicateEmailException. These are also caught by the GlobalExceptionHandler and mapped to appropriate HTTP status codes like 400, 404, or 409 with meaningful messages. This ensures business logic errors are separated from validation and security errors.
+
+If unexpected runtime errors occur — such as database failures, null pointer issues, or unhandled conditions — they fall through to a generic exception handler method in the global handler, which returns a 500 Internal Server Error response with a safe message. This prevents stack traces or sensitive details from being exposed to clients.
+
+In summary, error handling is layered: security errors are handled in the filter and security entry point (401/403), validation errors are handled by Bean Validation and the global exception handler (400), business logic errors are handled by custom exceptions (domain-specific status codes), and system errors are caught by a fallback global handler (500). This layered approach ensures consistent, secure, and structured error responses across the entire API.
 
 
